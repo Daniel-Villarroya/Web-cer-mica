@@ -1,0 +1,586 @@
+html{
+    scroll-behavior: smooth;
+}
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body{
+    height: 100vh;
+    width: 100vw;
+    overflow-x: hidden;
+}
+
+.gallery_background{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -100;
+    overflow: hidden;
+}
+
+.gallery_background img{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; 
+    opacity: 0;
+    animation: animationFade 45s infinite;
+}
+
+.gallery_background img:nth-child(1){animation-delay: 0s;}
+.gallery_background img:nth-child(2){animation-delay: 10s;}
+.gallery_background img:nth-child(3){animation-delay: 20s;}
+.gallery_background img:nth-child(4){animation-delay: 35s;}
+
+@keyframes animationFade {
+    0% {opacity: 0;}
+    10% {opacity: 1;}
+    25% {opacity: 1;}
+    35% {opacity: 1;}
+    100% {opacity: 0;}
+}
+
+#up_bar1{
+    position: fixed;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    height: 50px;
+    width: 97%;
+    z-index: 10;
+}
+
+#up_bar2{
+    width: 100vw;   
+    display: flex;
+    justify-content: space-between;
+    z-index: 11px;
+}
+
+.vertical_separator{
+    width: 1px;
+    height: 30px;
+    background-color: rgb(255, 255, 255);
+    align-self: center;
+    margin-right: 10px;
+    margin-left: 10px;
+}
+
+#company_logo{
+    color: white;
+    display: flex;
+    align-items: center;
+    height: 20px;
+    width: 130px;
+    margin-left: 2%
+}
+
+
+#home_button{
+    border: 0;
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 6px;
+    height: 25px;
+    width: 30px
+}
+
+#home_button {
+    background-color: transparent; 
+    border: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    width: 35px;  
+    height: 35px; 
+    
+    padding: 0;    
+    cursor: pointer;
+}
+
+#home_icon {
+    width: 100% !important; 
+    height: 100% !important; 
+    fill: none;
+    stroke: white;
+    transition: stroke 0.1s ease;
+}
+
+#home_button:hover #home_icon {
+    stroke: rgb(49, 200, 255) !important;
+    fill: rgb(49, 200, 255) !important;
+}
+
+#right_menu{
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap:-10px;
+    width: 300px;
+    height: 20px;
+}
+
+#user_menu{
+    height: 25px;
+}
+
+#chat_button{
+    border: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 33px;
+    height: 33px;
+    background-color: transparent;
+    margin-left: 5px;
+}
+
+#chat_icon{
+    width: 100% !important;
+    height: 100% !important;
+    fill: none;
+    stroke: rgb(255, 255, 255);
+    transition: stroke 0.1s ease, fill 0.1s ease;
+}
+
+#chat_icon:hover {
+    stroke: rgb(49, 200, 255) !important;
+    fill: rgb(49, 200, 255) !important;
+}
+
+
+#user{  
+    position: relative;  
+    background: transparent;
+    border: none;
+
+    width: 80px;
+    height: 30px;
+}
+
+
+#user_name{
+    font-size: larger;
+    margin-top: 4px;
+    transform: scale(1);
+    color: white;
+}
+
+#user_menu{
+    display: none;
+    position: absolute; 
+    top: 100%;
+    right: -10px;
+    margin-top: 10px;
+    z-index: -1;
+    
+    background: rgb(228, 228, 228);
+    border-radius: 50px;
+    
+    
+    width: 100px;
+    height: 40px;
+}
+
+.user_menu_button{
+    position:absolute;
+    top: 100%;
+    margin-top: 12px;
+    
+    background: transparent;
+    border: none;
+}
+
+#user:hover #user_menu{
+    display: flex;
+}
+
+#ig{
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    background: transparent;
+    height: 35px;
+    width: 35px;
+}
+
+#ig_icon path{
+    fill: white;
+
+    transition: stroke 0.2s ease, fill 0.2s ease;
+}
+
+#ig:hover #ig_icon path{
+    fill: rgb(49, 200, 255);
+}
+
+#center_content{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+#company_name{
+    color: white;
+    font-size: 3em;
+    margin-bottom: 20px;
+}
+
+#company_description{
+    color: white;
+    margin-bottom: 30px;
+}
+
+#explore_button{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background-color: transparent;
+    border-style:solid;
+    border-color: white;
+    border-radius: 30px;
+    color: white;
+
+    padding: 15px 30px;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: background-color 0.1s ease;
+}
+
+#explore_button:hover{
+    background-color: rgb(49, 200, 255);
+    border-color: rgb(49, 200, 255);
+}
+
+#explore_arrow{
+    position:absolute;
+    color: transparent;
+    z-index: -1;
+
+    transition: color 0.3s ease, transform 0.4s ease;
+}
+
+#explore_button:hover #explore_arrow{
+    color: rgb(49, 200, 255);
+    transform: translateY(200%);
+}
+
+.product_container{
+    display:flex;
+    justify-content: center;
+    position: absolute;
+    min-height: 100vh;
+    width: 100vw;
+    margin-top: 100vh;
+    background-color: rgb(37, 42, 47)
+    
+}
+
+#product_grid{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    width: 80%;
+    margin-top: 40px;
+    margin-bottom: 40px;
+}
+
+.card {
+    position: relative; 
+    height: 290px;
+    width: 220px;
+    background-color: white;
+    border-radius: 12px;
+    overflow: hidden; 
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: scale(1.08);
+}
+
+.card-img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+}
+
+.card-text-fade {
+    position: absolute;
+    top: 0; 
+    left: 0;
+    width: 100%;
+    height: 45%; 
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0) 100%);
+    z-index: 1;
+}
+
+.card-info {
+    font-family: sans-serif;
+    font-size:75%;
+    position: absolute;
+    top: 12px; 
+    left: 12px;
+    color: white;   
+    z-index: 2; 
+}
+
+.card-button{
+    position:absolute;
+    bottom: 0;
+    right: 0;
+
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    margin-bottom: 10px;
+    margin-right: 10px;
+    height: 25px;
+    width: 25px;
+
+    background: transparent;
+    border-color: rgb(255, 255, 255);
+    border-style:solid;
+    border-radius: 15px;
+
+    transition: background-color 0.2s ease, border-color 0.2s ease, width 0.2s ease;
+}
+
+.card-button-text{
+    font-family: sans-serif;
+    font-size:smaller;
+    position: absolute;
+    top: 1;
+    right: 1;
+    width: 76px;
+    color: transparent;
+
+    transition: color 0.1s ease;
+}
+
+.card-button-x{
+    display: inline-block;
+    margin-right: 3px;
+    width: 15px;
+    height: 15px;
+    transform: rotate(45deg);
+    stroke: white;
+
+    transition: width 0.2s ease, height 0.2s ease;
+}
+
+.img-arrows {
+    position: absolute;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    
+    width: 90%; 
+    height: 50px;
+    
+    opacity: 0;
+    pointer-events: none; 
+    transition: opacity 0.2s ease; 
+}
+
+.card:hover .img-arrows {
+    opacity: 1; 
+    pointer-events: auto; 
+}
+
+.img-arrow-circle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+
+    width: 25px;
+    height: 25px;
+    min-width: 25px;  
+    min-height: 25px; 
+    overflow: hidden; 
+    
+    cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.2s ease; 
+}
+
+.img-arrow-circle:hover {
+    transform: scale(1.2); 
+    background: rgb(49, 200, 255); 
+}
+
+.img-arrow-circle svg {
+    width: 16px; 
+    height: 16px;
+    display: block;
+}
+
+#img-arrow-R {
+    fill: white;
+    transform: rotate(-90deg);
+}
+
+#img-arrow-L {
+    fill: white;
+    transform: rotate(90deg);
+}
+
+
+.card-button:hover{
+    background-color: rgb(49, 200, 255);
+    border-color: rgb(49, 200, 255);
+    width: 80px;
+}
+
+.card-button:hover .card-button-text{
+    color: white;
+}
+
+.card-button:hover .card-button-x{
+    width: 0px;
+    height: 0px;
+}
+
+/*----------Chat Page----------*/
+#chat_page{
+    height: 100vh;
+    width:  100vw;
+    position: absolute;
+    background: rgb(245, 244, 242); 
+}
+
+#chat_background{
+    background: rgb(255, 252, 243);
+}
+
+#big_horizontal_separator{
+    background: rgb(235, 232, 224);
+    position:absolute;  
+    width: 100vw;
+    height: 90px;
+}
+
+#chat-bar{
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    margin-bottom: 20px;
+    margin-left: 20px;
+
+    display:flex;
+    align-items: center;
+    justify-content: left;
+
+    height: 47px;
+    width: 97vw;
+
+    background: rgb(244, 253, 255);
+    border-radius: 30px;
+    border-style: solid;
+    border-width: 1px;
+}
+
+#chat-bar-text{
+    background: transparent;
+    border: none;
+    outline: none;
+
+    width: 99%;
+    resize: none;
+    height: 40px;
+    min-height: 40px;
+    max-height: 150px;
+    overflow-y: auto; 
+    margin-right: 20px;        
+    
+    box-sizing: border-box;
+    padding: 6px;
+    font-family: inherit;
+    font-size: 25px;
+}
+
+#add-file-menu{
+    position: absolute;
+    bottom: 100%;
+    left: 10px;
+    margin-bottom: 15px;
+    height: 150px;
+    width: 35px;
+    background: white;
+    border-radius: 30px;
+
+    transform: translateX(-50%) scale(0.9);
+    transform-origin: bottom center; 
+    opacity: 0;
+
+    transition: opacity 0.1s ease;
+}
+
+#add-file-button{
+    height: 25px;
+    width: 25px;
+    margin-left: 10px;
+
+    background: transparent;
+    border-style: solid;
+    border-radius: 20px;
+    border-width: 1.5px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    transition: transform 0.1s ease;
+}
+
+#add-file-button:hover{
+    transform: scale(1.1);
+}
+
+#add-file-button:focus{
+    transform: scale(1.1);
+}
+
+#add-file-button:focus #add-file-x{
+    transform: rotate(180deg);
+}
+
+#add-file-button:focus #add-file-menu{
+    opacity: 1;
+}
+
+#add-file-x{    
+    stroke-width: 5px;
+    height: 70%;
+    width: 70%;
+
+    transform: rotate(45deg);
+
+    transition: transform 0.4s ease;
+}
