@@ -2,7 +2,7 @@
 <html lang="es">
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0", maximum-scale="1.0", user-scalable="no">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         <title>Mohan Ceramics App</title>
         <link rel="stylesheet" href="appStyle.css">
         <script src="appScript.js" defer></script>
@@ -46,15 +46,53 @@
             <div class="page" id="stats"></div>
         </div>
 
+        <!-- CREAR / EDITAR PRODUCTO -->
         <div class="floating_window" id="product_creator">
             <button class="close_button" id="close_creator">
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="close_creator_icon"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="Menu / Close_SM"> <path id="Vector" d="M16 16L12 12M12 12L8 8M12 12L16 8M12 12L8 16" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g> </g></svg>
             </button>
+
+            <div class="window_content">
+                <h2 class="window_title" id="creator_title">Nuevo producto</h2>
+
+                <label class="field_label">Imágenes</label>
+                <div id="image_previews">
+                    <label class="add_image_tile" id="add_image_tile" for="image_input">+</label>
+                </div>
+                <input type="file" id="image_input" accept="image/*" multiple hidden>
+
+                <label class="field_label" for="title_input">Título</label>
+                <input type="text" id="title_input" class="text_input" maxlength="60" placeholder="Ej: Jarrón de arcilla" autocomplete="off">
+
+                <label class="field_label" for="tag_input">Etiquetas</label>
+                <div class="tag_row">
+                    <input type="text" id="tag_input" class="text_input" maxlength="24" placeholder="Escribe y pulsa añadir" autocomplete="off">
+                    <button type="button" id="add_tag_button" class="secondary_button">Añadir</button>
+                </div>
+                <div id="tag_list" class="tag_list"></div>
+
+                <p id="creator_error" class="error_text"></p>
+
+                <button type="button" id="save_product" class="primary_button">Guardar producto</button>
+            </div>
         </div>
 
+        <!-- VISTA DE PRODUCTO -->
         <div class="floating_window" id="close_view">
             <button class="close_button" id="close_close_view">
                 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="close_creator_icon"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <g id="Menu / Close_SM"> <path id="Vector" d="M16 16L12 12M12 12L8 8M12 12L16 8M12 12L8 16" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g> </g></svg>
             </button>
+
+            <div class="window_content" id="detail_content">
+                <div id="detail_gallery"></div>
+                <h2 class="window_title" id="detail_title"></h2>
+                <div id="detail_tags" class="tag_list"></div>
+
+                <div class="detail_actions">
+                    <button type="button" id="edit_product" class="primary_button">Editar</button>
+                    <button type="button" id="delete_product" class="danger_button">Borrar</button>
+                </div>
+            </div>
         </div>
     </body>
+</html>
