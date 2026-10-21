@@ -65,6 +65,7 @@ function renderProducts(products) {
         });
 
         chatButton.addEventListener("click", () => {
+            openChatForProduct(prod, index);
             changePage(1); 
         });
 
@@ -83,9 +84,10 @@ function changePage(pageToChangeTo){
         chat_page.style.display = "none";
     }else if(pageToChangeTo == 1){
         main_page.style.display = "none";
-        chat_page.style.display = "block";  
+        chat_page.style.display = "block";
+        scrollMessagesToBottom(false);  
     }else if(pageToChangeTo == 2){
-        print("Change to login page");
+        console.log("Change to login page");
     }
 }
 
@@ -100,8 +102,305 @@ btnChat.addEventListener("click", () => {
 btnExplore.addEventListener("click", () => {
     if(elementToScroll){
         elementToScroll.scrollIntoView({
-            behaviour: "smooth",
+            behavior: "smooth",
             block: "start"
         });
     }
 })
+
+//---------------------------------------------------------------------------------//
+//------------------------------------- CHAT --------------------------------------//
+// De momento los chats son datos inventados. Al conectar Firebase:
+//  - cuando llegue un mensaje de la otra persona -> addMessage(chatId, 'them', texto)
+//  - al enviar (mira sendMessage)                -> guarda también el mensaje en Firebase
+const SIMULATE_REPLIES = true; // ponlo en false cuando conectes Firebase
+
+const chat_list = document.getElementById('chat_list');
+const message_list = document.getElementById('message_list');
+const conversation_avatar = document.getElementById('conversation_avatar');
+const conversation_title = document.getElementById('conversation_title');
+const chat_form = document.getElementById('chat-bar');
+const chat_text = document.getElementById('chat-bar-text');
+const send_button = document.getElementById('send_button');
+
+const minutesAgo = m => Date.now() - m * 60000;
+
+// Un chat por producto. id = 'p' + posición del producto en myProducts
+const chats = [
+    { id: 'p0', title: myProducts[0].name, img: myProducts[0].img, unread: 2, created: minutesAgo(200), messages: [
+        { from: 'me',   text: 'Hola, ¿el jarrón sigue disponible?', ts: minutesAgo(180) },
+        { from: 'them', text: '¡Hola! Sí, sigue disponible. Está hecho a mano.', ts: minutesAgo(172) },
+        { from: 'me',   text: '¿Qué altura tiene?', ts: minutesAgo(165) },
+        { from: 'them', text: 'Mide unos 28 cm de alto.', ts: minutesAgo(160) },
+        { from: 'them', text: 'Si quieres te mando más fotos.', ts: minutesAgo(159) }
+    ]},
+    { id: 'p1', title: myProducts[1].name, img: myProducts[1].img, unread: 0, created: minutesAgo(900), messages: [
+        { from: 'me',   text: 'Buenas, ¿hacéis envíos a Barcelona?', ts: minutesAgo(620) },
+        { from: 'them', text: 'Sí, enviamos a toda España en 3-4 días.', ts: minutesAgo(600) },
+        { from: 'me',   text: '¡Perfecto, gracias!', ts: minutesAgo(598) }
+    ]},
+    { id: 'p2', title: myProducts[2].name, img: myProducts[2].img, unread: 0, created: minutesAgo(3000), messages: [
+        { from: 'me',   text: '¿Se puede pedir el juego con otro color?', ts: minutesAgo(1600) },
+        { from: 'them', text: 'Claro, puedo hacerlo en verde o en blanco.', ts: minutesAgo(1580) }
+    ]}
+];
+
+let activeChatId = chats[0].id;
+let typingItem = null;
+let replyTimers = [];
+
+function getChat(id) {
+    return chats.find(c => c.id === id);
+}
+
+function chatUpdated(chat) {
+    return chat.messages.length ? chat.messages[chat.messages.length - 1].ts : chat.created;
+}
+
+function formatClock(ts) {
+    return new Date(ts).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+}
+
+function formatChatTime(ts) {
+    const now = new Date();
+    const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    if (ts >= startToday) return formatClock(ts);
+    if (ts >= startToday - 86400000) return 'ayer';
+    return new Date(ts).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' });
+}
+
+function scrollMessagesToBottom(smooth = true) {
+    message_list.scrollTo({ top: message_list.scrollHeight, behavior: smooth ? 'smooth' : 'auto' });
+}
+
+// ---- Columna de chats ----
+function renderChatList() {
+    chat_list.innerHTML = '';
+
+    [...chats].sort((a, b) => chatUpdated(b) - chatUpdated(a)).forEach(chat => {
+        const item = document.createElement('li');
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'chat_item';
+        button.setAttribute('aria-current', chat.id === activeChatId ? 'true' : 'false');
+        button.setAttribute('aria-label', 'Abrir chat de ' + chat.title);
+        button.addEventListener('click', () => selectChat(chat.id));
+
+        const avatar = document.createElement('img');
+        avatar.className = 'chat_avatar';
+        avatar.src = chat.img;
+        avatar.alt = '';
+
+        const text = document.createElement('span');
+        text.className = 'chat_item_text';
+
+        const title = document.createElement('strong');
+        title.className = 'chat_item_title';
+        title.textContent = chat.title;
+
+        const preview = document.createElement('span');
+        preview.className = 'chat_preview';
+        const last = chat.messages[chat.messages.length - 1];
+        preview.textContent = last ? (last.from === 'me' ? 'Tú: ' : '') + last.text : 'Chat nuevo';
+
+        text.appendChild(title);
+        text.appendChild(preview);
+
+        const meta = document.createElement('span');
+        meta.className = 'chat_item_meta';
+
+        if (last) {
+            const time = document.createElement('time');
+            time.className = 'chat_time';
+            time.dateTime = new Date(last.ts).toISOString();
+            time.textContent = formatChatTime(last.ts);
+            meta.appendChild(time);
+        }
+
+        if (chat.unread > 0) {
+            const badge = document.createElement('span');
+            badge.className = 'chat_badge';
+            badge.textContent = chat.unread;
+            badge.setAttribute('aria-label', chat.unread + ' mensajes sin leer');
+            meta.appendChild(badge);
+        }
+
+        button.appendChild(avatar);
+        button.appendChild(text);
+        button.appendChild(meta);
+        item.appendChild(button);
+        chat_list.appendChild(item);
+    });
+}
+
+// ---- Mensajes ----
+// Burbuja azul a la derecha (from: 'me') o gris a la izquierda (from: 'them')
+function createMessageItem(msg, isNew) {
+    const item = document.createElement('li');
+    item.className = 'message ' + (msg.from === 'me' ? 'mine' : 'theirs') + (isNew ? ' new' : '');
+
+    const bubble = document.createElement('p');
+    bubble.className = 'bubble';
+    bubble.textContent = msg.text;
+
+    const time = document.createElement('time');
+    time.className = 'message_time';
+    time.dateTime = new Date(msg.ts).toISOString();
+    time.textContent = formatClock(msg.ts);
+
+    item.appendChild(bubble);
+    item.appendChild(time);
+    return item;
+}
+
+function createHint(chat) {
+    const hint = document.createElement('li');
+    hint.className = 'chat_hint';
+    hint.textContent = 'Escribe tu primer mensaje sobre «' + chat.title + '».';
+    return hint;
+}
+
+function renderConversation() {
+    const chat = getChat(activeChatId);
+    if (!chat) return;
+
+    conversation_avatar.src = chat.img;
+    conversation_title.textContent = chat.title;
+
+    message_list.innerHTML = '';
+    typingItem = null;
+
+    if (chat.messages.length === 0) {
+        message_list.appendChild(createHint(chat));
+    } else {
+        chat.messages.forEach(msg => message_list.appendChild(createMessageItem(msg, false)));
+    }
+    scrollMessagesToBottom(false);
+}
+
+function selectChat(id) {
+    const chat = getChat(id);
+    if (!chat) return;
+
+    activeChatId = id;
+    chat.unread = 0;
+    renderChatList();
+    renderConversation();
+}
+
+// Añade un mensaje a un chat. Esta es la función que usará Firebase para los mensajes entrantes.
+function addMessage(chatId, from, text) {
+    const chat = getChat(chatId);
+    if (!chat) return;
+
+    const msg = { from, text, ts: Date.now() };
+    chat.messages.push(msg);
+
+    if (chatId === activeChatId) {
+        const hint = message_list.querySelector('.chat_hint');
+        if (hint) hint.remove();
+        hideTyping();
+        message_list.appendChild(createMessageItem(msg, true));
+        scrollMessagesToBottom();
+    } else if (from === 'them') {
+        chat.unread = (chat.unread || 0) + 1;
+    }
+
+    renderChatList();
+}
+
+// ---- Indicador "escribiendo..." ----
+function showTyping() {
+    if (typingItem) return;
+
+    typingItem = document.createElement('li');
+    typingItem.className = 'message theirs typing new';
+    typingItem.setAttribute('aria-label', 'Escribiendo...');
+
+    const bubble = document.createElement('p');
+    bubble.className = 'bubble';
+    for (let i = 0; i < 3; i++) bubble.appendChild(document.createElement('span'));
+
+    typingItem.appendChild(bubble);
+    message_list.appendChild(typingItem);
+    scrollMessagesToBottom();
+}
+
+function hideTyping() {
+    if (typingItem) {
+        typingItem.remove();
+        typingItem = null;
+    }
+}
+
+// ---- Respuestas inventadas (solo para probar el diseño) ----
+const FAKE_REPLIES = [
+    '¡Gracias por tu mensaje! Te contesto enseguida.',
+    'Claro, cada pieza está hecha a mano, así que puede haber pequeñas diferencias.',
+    'Sí, puedo enviarlo a toda España.',
+    '¿Quieres que te mande más fotos?',
+    'Perfecto, lo reservo para ti.'
+];
+let fakeReplyIndex = 0;
+
+function simulateReply(chatId) {
+    replyTimers.forEach(clearTimeout);
+    replyTimers = [
+        setTimeout(() => { if (chatId === activeChatId) showTyping(); }, 600),
+        setTimeout(() => {
+            addMessage(chatId, 'them', FAKE_REPLIES[fakeReplyIndex++ % FAKE_REPLIES.length]);
+        }, 2200)
+    ];
+}
+
+// ---- Enviar ----
+function sendMessage() {
+    const text = chat_text.value.trim();
+    if (!text) return;
+
+    addMessage(activeChatId, 'me', text);
+    // Aquí irá también el guardado en Firebase
+
+    chat_text.value = '';
+    resizeTextarea();
+    send_button.disabled = true;
+    chat_text.focus();
+
+    if (SIMULATE_REPLIES) simulateReply(activeChatId);
+}
+
+function resizeTextarea() {
+    chat_text.style.height = 'auto';
+    chat_text.style.height = Math.min(chat_text.scrollHeight, 150) + 'px';
+}
+
+chat_text.addEventListener('input', () => {
+    resizeTextarea();
+    send_button.disabled = chat_text.value.trim() === '';
+});
+
+// Enter envía, Shift+Enter hace un salto de línea
+chat_text.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
+        e.preventDefault();
+        sendMessage();
+    }
+});
+
+chat_form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    sendMessage();
+});
+
+// Botón "Iniciar chat" de un producto: abre el chat de ese producto (lo crea si no existe)
+function openChatForProduct(prod, index) {
+    const id = 'p' + index;
+    if (!getChat(id)) {
+        chats.push({ id, title: prod.name, img: prod.img, unread: 0, created: Date.now(), messages: [] });
+    }
+    selectChat(id);
+}
+
+renderChatList();
+renderConversation();

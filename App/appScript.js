@@ -91,10 +91,22 @@ function saveProducts() {
 //---------------RENDER DE LA LISTA----------------//
 const product_grid = document.getElementById('product_grid');
 
-function createTagChip(text) {
-  const chip = document.createElement('span');
+// Etiqueta (<li>). Si recibe onRemove, se puede pulsar para quitarla.
+function createTagChip(text, onRemove) {
+  const chip = document.createElement('li');
   chip.className = 'tag_chip';
-  chip.textContent = text;
+
+  if (onRemove) {
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'tag_remove';
+    remove.textContent = text + ' ×';
+    remove.setAttribute('aria-label', 'Quitar etiqueta ' + text);
+    remove.addEventListener('click', onRemove);
+    chip.appendChild(remove);
+  } else {
+    chip.textContent = text;
+  }
   return chip;
 }
 
@@ -110,12 +122,14 @@ function renderProducts() {
   }
 
   products.forEach(prod => {
-    const card = document.createElement('div');
+    const card = document.createElement('article');
     card.className = 'product';
     card.id = 'product' + prod.id;
 
-    const overlay = document.createElement('div');
+    const overlay = document.createElement('button');
+    overlay.type = 'button';
     overlay.className = 'product_input_overlay';
+    overlay.setAttribute('aria-label', 'Ver ' + prod.name);
     overlay.addEventListener('click', () => openDetail(prod.id));
 
     const img = document.createElement('img');
@@ -123,14 +137,14 @@ function renderProducts() {
     img.src = prod.images[0];
     img.alt = prod.name;
 
-    const info = document.createElement('div');
+    const info = document.createElement('header');
     info.className = 'product_info';
 
-    const name = document.createElement('h4');
+    const name = document.createElement('h3');
     name.className = 'product_name';
     name.textContent = prod.name;
 
-    const tags = document.createElement('div');
+    const tags = document.createElement('ul');
     tags.className = 'tag_list';
     prod.tags.slice(0, 3).forEach(t => tags.appendChild(createTagChip(t)));
     if (prod.tags.length > 3) tags.appendChild(createTagChip('+' + (prod.tags.length - 3)));
@@ -145,6 +159,7 @@ function renderProducts() {
 }
 
 //---------------CREAR / EDITAR----------------//
+const creator_form = document.getElementById('creator_form');
 const creator_title = document.getElementById('creator_title');
 const image_input = document.getElementById('image_input');
 const image_previews = document.getElementById('image_previews');
@@ -154,7 +169,6 @@ const tag_input = document.getElementById('tag_input');
 const add_tag_button = document.getElementById('add_tag_button');
 const tag_list = document.getElementById('tag_list');
 const creator_error = document.getElementById('creator_error');
-const save_product = document.getElementById('save_product');
 
 let editingId = null;   // null = producto nuevo
 let draftImages = [];
@@ -229,7 +243,7 @@ function renderDraftImages() {
   image_previews.querySelectorAll('.preview_item').forEach(el => el.remove());
 
   draftImages.forEach((src, i) => {
-    const item = document.createElement('div');
+    const item = document.createElement('li');
     item.className = 'preview_item';
 
     const img = document.createElement('img');
@@ -240,6 +254,7 @@ function renderDraftImages() {
     remove.type = 'button';
     remove.className = 'remove_badge';
     remove.textContent = '×';
+    remove.setAttribute('aria-label', 'Quitar imagen ' + (i + 1));
     remove.addEventListener('click', () => {
       draftImages.splice(i, 1);
       renderDraftImages();
@@ -273,25 +288,23 @@ function addTag() {
 function renderDraftTags() {
   tag_list.innerHTML = '';
   draftTags.forEach((tag, i) => {
-    const chip = createTagChip(tag);
-    chip.classList.add('removable');
-    chip.addEventListener('click', () => {
+    tag_list.appendChild(createTagChip(tag, () => {
       draftTags.splice(i, 1);
       renderDraftTags();
-    });
-    tag_list.appendChild(chip);
+    }));
   });
 }
 
 add_tag_button.addEventListener('click', addTag);
 tag_input.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' || e.key === ',') {
-    e.preventDefault();
+    e.preventDefault(); // evita que Enter envíe el formulario entero
     addTag();
   }
 });
 
-save_product.addEventListener('click', () => {
+creator_form.addEventListener('submit', (e) => {
+  e.preventDefault();
   addTag(); // por si dejó una etiqueta escrita sin pulsar "Añadir"
 
   const name = title_input.value.trim();
@@ -385,6 +398,170 @@ delete_product.addEventListener('click', () => {
 });
 
 renderProducts();
+
+//---------------ESTADÍSTICAS (DATOS INVENTADOS)----------------//
+// Cuando integres Firebase, solo hay que sustituir este bloque FAKE_DATA
+// por los datos reales; las funciones de dibujo de abajo no cambian.
+
+const MONTH_NAMES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+const MONTH_SHORT = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+
+const now = new Date();
+const currentMonth = now.getMonth();
+const today = now.getDate();
+const daysInMonth = new Date(now.getFullYear(), currentMonth + 1, 0).getDate();
+
+// Generador pseudoaleatorio con semilla: los datos inventados son siempre los mismos
+function seededRandom(seed) {
+  return function () {
+    seed |= 0;
+    seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+const rand = seededRandom(2024);
+
+const FAKE_DATA = {
+  // Una posición por día transcurrido de este mes
+  salesPerDay: Array.from({ length: today }, () => Math.round(rand() * 5)),
+  viewsPerDay: Array.from({ length: today }, () => Math.round(60 + rand() * 140)),
+  // Una posición por mes (enero → diciembre)
+  salesPerMonth: [14, 11, 16, 20, 17, 23, 13, 9, 19, 22, 25, 31],
+  moneyPerMonth: [820, 640, 910, 1150, 980, 1320, 760, 540, 1080, 1275, 1430, 1890]
+};
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+function svgEl(tag, attrs = {}, text) {
+  const el = document.createElementNS(SVG_NS, tag);
+  Object.keys(attrs).forEach(k => el.setAttribute(k, attrs[k]));
+  if (text !== undefined) el.textContent = text;
+  return el;
+}
+
+const CHART = { w: 340, h: 190, l: 34, r: 10, t: 16, b: 26 };
+const PLOT_W = CHART.w - CHART.l - CHART.r;
+const PLOT_H = CHART.h - CHART.t - CHART.b;
+
+// Calcula un máximo "redondo" para el eje Y
+function niceScale(max) {
+  const safeMax = Math.max(max, 4);
+  const rough = safeMax / 4;
+  const mag = Math.pow(10, Math.floor(Math.log10(rough)));
+  const norm = rough / mag;
+  const step = (norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 5 ? 5 : 10) * mag;
+  return { step, top: step * Math.ceil(safeMax / step) };
+}
+
+function createChartSvg(label, top, step) {
+  const svg = svgEl('svg', { viewBox: `0 0 ${CHART.w} ${CHART.h}`, role: 'img', 'aria-label': label });
+
+  for (let i = 0; i <= top / step; i++) {
+    const value = i * step;
+    const y = CHART.t + PLOT_H - (value / top) * PLOT_H;
+    svg.appendChild(svgEl('line', { x1: CHART.l, x2: CHART.w - CHART.r, y1: y, y2: y, class: 'chart_grid' }));
+    svg.appendChild(svgEl('text', { x: CHART.l - 6, y: y + 3, 'text-anchor': 'end', class: 'chart_text' }, value >= 1000 ? (value / 1000) + 'k' : value));
+  }
+  return svg;
+}
+
+// Gráfica de puntos: un punto por día (los días futuros quedan vacíos)
+function renderPointChart(container, values, totalDays, unit, label) {
+  const { step, top } = niceScale(Math.max(...values));
+  const svg = createChartSvg(label, top, step);
+
+  const xAt = d => CHART.l + ((d - 1) / (totalDays - 1)) * PLOT_W;
+  const yAt = v => CHART.t + PLOT_H - (v / top) * PLOT_H;
+
+  for (let d = 1; d <= totalDays; d++) {
+    if (d === 1 || d % 5 === 0) {
+      svg.appendChild(svgEl('text', { x: xAt(d), y: CHART.h - 8, 'text-anchor': 'middle', class: 'chart_text' }, d));
+    }
+  }
+
+  const path = values.map((v, i) => `${i === 0 ? 'M' : 'L'}${xAt(i + 1)} ${yAt(v)}`).join(' ');
+  svg.appendChild(svgEl('path', { d: path, class: 'chart_line' }));
+
+  values.forEach((v, i) => {
+    const point = svgEl('circle', { cx: xAt(i + 1), cy: yAt(v), r: 3.5, class: 'chart_point' });
+    point.appendChild(svgEl('title', {}, `Día ${i + 1}: ${v} ${unit}`));
+    svg.appendChild(point);
+  });
+
+  container.appendChild(svg);
+}
+
+// Gráfica de barras: una barra por mes, el mes actual resaltado
+function renderBarChart(container, values, labels, highlightIndex, label) {
+  const { step, top } = niceScale(Math.max(...values));
+  const svg = createChartSvg(label, top, step);
+
+  const slot = PLOT_W / values.length;
+  const barW = slot * 0.62;
+
+  values.forEach((v, i) => {
+    const height = (v / top) * PLOT_H;
+    const x = CHART.l + slot * i + (slot - barW) / 2;
+    const y = CHART.t + PLOT_H - height;
+
+    const bar = svgEl('rect', { x, y, width: barW, height, rx: 3, class: 'chart_bar' + (i === highlightIndex ? ' current' : '') });
+    bar.appendChild(svgEl('title', {}, `${labels[i]}: ${v} ventas`));
+    svg.appendChild(bar);
+
+    svg.appendChild(svgEl('text', { x: x + barW / 2, y: y - 4, 'text-anchor': 'middle', class: 'chart_text chart_value' }, v));
+    svg.appendChild(svgEl('text', { x: x + barW / 2, y: CHART.h - 8, 'text-anchor': 'middle', class: 'chart_text' }, labels[i]));
+  });
+
+  container.appendChild(svg);
+}
+
+// Dinero ganado: este mes primero y, deslizando a la derecha, los meses anteriores
+function renderMoney(container, moneyPerMonth) {
+  const euros = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+
+  for (let m = currentMonth; m >= 0; m--) {
+    const item = document.createElement('li');
+    item.className = 'money_item' + (m === currentMonth ? ' current' : '');
+
+    const month = document.createElement('p');
+    month.className = 'money_month';
+    month.textContent = m === currentMonth
+      ? 'Este mes'
+      : MONTH_NAMES[m].charAt(0).toUpperCase() + MONTH_NAMES[m].slice(1);
+
+    const amount = document.createElement('strong');
+    amount.className = 'money_amount';
+    amount.textContent = euros.format(moneyPerMonth[m]);
+
+    item.appendChild(month);
+    item.appendChild(amount);
+    container.appendChild(item);
+  }
+}
+
+function sum(list) {
+  return list.reduce((a, b) => a + b, 0);
+}
+
+function renderStats() {
+  const number = new Intl.NumberFormat('es-ES');
+
+  renderMoney(document.getElementById('money_scroller'), FAKE_DATA.moneyPerMonth);
+
+  document.getElementById('sales_total').textContent = number.format(sum(FAKE_DATA.salesPerDay)) + ' ventas';
+  renderPointChart(document.getElementById('sales_chart'), FAKE_DATA.salesPerDay, daysInMonth, 'ventas', 'Ventas por día este mes');
+
+  document.getElementById('views_total').textContent = number.format(sum(FAKE_DATA.viewsPerDay)) + ' visitas';
+  renderPointChart(document.getElementById('views_chart'), FAKE_DATA.viewsPerDay, daysInMonth, 'visitas', 'Visitas a la web por día este mes');
+
+  document.getElementById('year_total').textContent = number.format(sum(FAKE_DATA.salesPerMonth)) + ' en el año';
+  renderBarChart(document.getElementById('months_chart'), FAKE_DATA.salesPerMonth, MONTH_SHORT, currentMonth, 'Ventas de cada mes del año');
+}
+
+renderStats();
 
 //------------------PWA------------------//
 if ('serviceWorker' in navigator) {
