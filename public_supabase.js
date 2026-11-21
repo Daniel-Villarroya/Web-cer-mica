@@ -399,7 +399,7 @@ async function fetchProductsFromDB() {
 
     if (error) {
         console.error(error);
-        container.innerHTML = '<p style="color: white; font-family: sans-serif;">No se pudieron cargar los productos.</p>';
+        container.innerHTML = '<p style="color: white; font-family: sans-serif;">No se pudieron cargar los productos: ' + escapeHtml(error.message || "error de conexión") + '</p>';
         return;
     }
 
@@ -902,6 +902,10 @@ async function openChatForProduct(prod) {
 }
 
 (async function initPublicApp() {
+    if (typeof db === "undefined") {
+        document.getElementById("product_grid").innerHTML = '<p style="color: white; font-family: sans-serif;">No se encontró el cliente de Supabase (`db`). Revisa supabase.js.</p>';
+        return;
+    }
     updateAuthUI();
     renderChatList();
     renderConversation();

@@ -6,12 +6,53 @@
         <title>Mohan Ceramics</title>
         <link rel="stylesheet" href="webStyle.css">
 
-        <script src="webScript.js" defer></script>
+        <!-- Carga ordenada de librerías y scripts, con CDN alternativo si el primero falla -->
+        <script>
+        (function () {
+            function load(urls) {
+                return new Promise(function (resolve, reject) {
+                    var i = 0;
+                    (function next() {
+                        if (i >= urls.length) { reject(new Error("No se pudo cargar: " + urls[0])); return; }
+                        var s = document.createElement("script");
+                        s.src = urls[i++];
+                        s.onload = resolve;
+                        s.onerror = function () { s.remove(); next(); };
+                        document.head.appendChild(s);
+                    })();
+                });
+            }
+            var domReady = new Promise(function (r) {
+                if (document.readyState !== "loading") r(); else document.addEventListener("DOMContentLoaded", r);
+            });
+            function fail(msg) {
+                console.error(msg);
+                domReady.then(function () {
+                    var grid = document.getElementById("product_grid");
+                    if (grid) grid.innerHTML = '<p style="color:white;font-family:sans-serif;">' + msg + '</p>';
+                });
+            }
 
-        <!--Enlace a supabase-->
-        <script src="https://jsdelivr.net" defer></script>
-        <script src="supabase.js" defer></script>
-        <script src="public_supabase.js" defer></script>
+            var three = "three@0.147.0";
+            var cdn = function (path) { return ["https://cdn.jsdelivr.net/npm/" + path, "https://unpkg.com/" + path]; };
+
+            // 3D (opcional: si falla, solo se pierde el visor 3D)
+            var threeReady = load(cdn(three + "/build/three.min.js"))
+                .then(function () { return load(cdn(three + "/examples/js/loaders/GLTFLoader.js")); })
+                .then(function () { return load(cdn(three + "/examples/js/loaders/OBJLoader.js")); })
+                .then(function () { return load(cdn(three + "/examples/js/loaders/STLLoader.js")); })
+                .catch(function (e) { console.warn("Visor 3D no disponible:", e.message); });
+
+            // Supabase -> tu supabase.js (crea `db`) -> lógica pública
+            load(cdn("@supabase/supabase-js@2.45.4/dist/umd/supabase.js"))
+                .then(function () { return load(["supabase.js"]); })
+                .then(function () { return Promise.all([threeReady, domReady]); })
+                .then(function () { return load(["public_supabase.js"]); })
+                .catch(function (e) {
+                    fail("Error cargando la web: " + e.message + ". Revisa tu conexión y que supabase.js y public_supabase.js estén junto a web.html.");
+                });
+        })();
+        </script>
     </head>
     
     <body>
