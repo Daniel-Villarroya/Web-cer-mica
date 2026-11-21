@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Mohan Ceramics</title>
+        <link rel="stylesheet" href="webStyle.css">
+
+        <!-- Three.js (visor 3D). Versión fija con loaders clásicos -->
+        <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js" defer></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/GLTFLoader.js" defer></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/OBJLoader.js" defer></script>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/STLLoader.js" defer></script>
+
+        <!-- Supabase: librería, tu cliente (supabase.js define `db`) y la lógica pública -->
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js" defer></script>
+        <script src="supabase.js" defer></script>
+        <script src="public_supabase.js" defer></script>
+    </head>
+    
+    <body>
+        <div class="gallery_background">
+            <img src="Images/Background Carousel/1.jpg">
+            <img src="Images/Background Carousel/2.jpg">
+            <img src="Images/Background Carousel/3.jpg">    
+            <img src="Images/Background Carousel/4.jpg">
+        </div>
+
+        <!------------------------------------------------------------------------------->
+        <main id="web_content">
+            <div id="up_bar1">
+                <div id="up_bar2">
+                    <div id="company_logo">
+                       <svg xmlns="http://www.w3.org/2000/svg" width="40" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C17.5121 2 21.9816 6.45975 21.999 11.9678C21.9992 11.9746 21.9989 11.9814 21.999 11.9883C21.999 11.9922 22 11.9961 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2ZM12 4C10.0751 4 8.30904 4.67985 6.92871 5.8125C7.58426 5.61027 8.27973 5.5 9 5.5C12.866 5.50002 16 8.63402 16 12.5C16 13.0523 15.5523 13.5 15 13.5C14.4477 13.5 14 13.0523 14 12.5C14 9.73859 11.7614 7.50002 9 7.5C6.38853 7.5 4.23108 9.50052 4.00098 12.043C4.02411 16.4415 7.59606 20 12 20C13.9248 20 15.69 19.3191 17.0703 18.1865C16.4149 18.3886 15.72 18.5 15 18.5C11.134 18.5 8 15.366 8 11.5C8 10.9477 8.44772 10.5 9 10.5C9.55228 10.5 10 10.9477 10 11.5C10 14.2614 12.2386 16.5 15 16.5C17.6118 16.5 19.7684 14.4989 19.998 11.9561C19.9744 7.558 16.4036 4 12 4Z"></path></svg>
+                    </div>
+        
+                    <div id="right_menu">
+                        <button id="home_button">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" id="home_icon"><path d="M21 20C21 20.5523 20.5523 21 20 21H4C3.44772 21 3 20.5523 3 20V9.48907C3 9.18048 3.14247 8.88917 3.38606 8.69972L11.3861 2.47749C11.7472 2.19663 12.2528 2.19663 12.6139 2.47749L20.6139 8.69972C20.8575 8.88917 21 9.18048 21 9.48907V20Z"></path></svg>
+                        </button>
+                        <button id="chat_button">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" id="chat_icon"><path d="M7.29117 20.8242L2 22L3.17581 16.7088C2.42544 15.3056 2 13.7025 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C10.2975 22 8.6944 21.5746 7.29117 20.8242Z"></path></svg>
+                        </button>
+
+                        <div class="vertical_separator"></div>
+
+                        <button id="ig">
+                            <svg viewBox="0 0 256 256" id="ig_icon" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M128,84a44,44,0,1,0,44,44A44.04978,44.04978,0,0,0,128,84Zm0,80a36,36,0,1,1,36-36A36.04061,36.04061,0,0,1,128,164ZM172,32H84A52.059,52.059,0,0,0,32,84v88a52.059,52.059,0,0,0,52,52h88a52.059,52.059,0,0,0,52-52V84A52.059,52.059,0,0,0,172,32Zm44,140a44.04978,44.04978,0,0,1-44,44H84a44.04978,44.04978,0,0,1-44-44V84A44.04978,44.04978,0,0,1,84,40h88a44.04978,44.04978,0,0,1,44,44ZM188,76a8,8,0,1,1-8-8A8.00917,8.00917,0,0,1,188,76Z"></path>
+                            </svg>
+                        </button>
+
+                        <div class="vertical_separator"></div>
+
+                        <div id="user">
+                            <p style="font-family:'Times New Roman', Times, serif" id="user_name">Usuario</p>
+
+                            <div id="user_menu">
+                                <button class="user_menu_button" id="login_button">Iniciar Sesión</button>
+                                <button class="user_menu_button" id="logout_button">Cerrar Sesión</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="main_page">
+                <div id="center_content">
+                    <h1 id="company_name">Cerámica Artística</h1>
+                    <p id="company_description">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec a diam lectus. Sed sit amet ipsum mauris. Maecenas congue ligula ac quam viverra nec consectetur ante hendrerit. Donec et mollis dolor.</p>
+                    <button id="explore_button">
+                        Explorar
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-move-down-icon lucide-move-down" id="explore_arrow"><path d="M8 18L12 22L16 18"/><path d="M12 2V22"/></svg>
+                    </button>
+                </div>
+
+                <section class="product_container">
+                    <div id="product_grid"></div>
+                </section>
+            </div>
+
+            <section id="chat_page">
+                <section id="chat_layout">
+                    <!-- Conversación -->
+                    <section id="conversation" aria-label="Conversación">
+                        <header id="conversation_header">
+                            <img id="conversation_avatar" class="chat_avatar" alt="">
+                            <hgroup id="conversation_heading">
+                                <h2 id="conversation_title">Chat</h2>
+                                <p id="conversation_subtitle">Mohan Ceramics</p>
+                            </hgroup>
+                        </header>
+
+                        <ol id="message_list" role="log" aria-live="polite"></ol>
+
+                        <form id="chat-bar" autocomplete="off">
+                            <button type="button" id="add-file-button" title="Añade un archivo">
+                        <span id="add-file-menu">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <circle cx="12" cy="13" r="3" stroke="#1C274C" stroke-width="0.528"></circle> <path d="M10.0001 19.9999H14.0001C16.809 19.9999 18.2135 19.9999 19.2224 19.3258C19.6591 19.0339 20.0341 18.6589 20.326 18.2222C21.0001 17.2133 21.0001 15.8088 21.0001 12.9999C21.0001 10.191 21 8.78673 20.3258 7.77783C20.034 7.34107 19.659 6.96607 19.2222 6.67423C18.2133 6.00011 16.8089 6.00011 14 6.00011H9.99995C7.19103 6.00011 5.78656 6.00011 4.77767 6.67423C4.34091 6.96607 3.96591 7.34107 3.67407 7.77783C3.0001 8.7865 3.0001 10.1903 3.0001 12.998L3.0001 12.9999C3.0001 15.8088 3.0001 17.2133 3.67422 18.2222C3.96605 18.6589 4.34106 19.0339 4.77782 19.3258C5.78671 19.9999 7.19117 19.9999 10.0001 19.9999Z" stroke="#1C274C" stroke-width="0.528"></path> <path d="M18 10H17.5" stroke="#1C274C" stroke-width="0.528" stroke-linecap="round"></path> <path d="M14.5 3.5H9.5" stroke="#1C274C" stroke-width="0.528" stroke-linecap="round"></path> </g></svg>
+                        </span>
+                        <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" id="add-file-x"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M19 5L5 19M5.00001 5L19 19" stroke="black" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+                    </button>
+
+                            <textarea placeholder="Empieza a escribir..." id="chat-bar-text" rows="1" aria-label="Mensaje"></textarea>
+
+                            <button type="submit" id="send_button" aria-label="Enviar mensaje" disabled>
+                                <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M3.4 20.4 21 12 3.4 3.6 3 10l12 2-12 2z"></path></svg>
+                            </button>
+                        </form>
+                    </section>
+
+                    <!-- Columna de chats -->
+                    <aside id="chat_list_panel" aria-label="Tus chats">
+                        <header id="chat_list_header">
+                            <h2>Chats</h2>
+                        </header>
+                        <ul id="chat_list"></ul>
+                    </aside>
+                </section>
+            </section>
+        </main>
+    </body>
+</html>
