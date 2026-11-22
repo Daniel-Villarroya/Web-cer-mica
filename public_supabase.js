@@ -172,6 +172,14 @@ function updateAuthUI() {
     if (!logged && userNameLabel) userNameLabel.textContent = "Usuario";
 }
 
+// Menú de usuario: también se abre con clic/toque (móvil) y se cierra al pulsar fuera
+const userBox = document.getElementById("user");
+userBox.addEventListener("click", (e) => {
+    if (e.target.closest(".user_menu_button")) { userBox.classList.remove("open"); return; }
+    userBox.classList.toggle("open");
+});
+document.addEventListener("click", (e) => { if (!userBox.contains(e.target)) userBox.classList.remove("open"); });
+
 loginBtn.addEventListener("click", openAuthModal);
 logoutBtn.addEventListener("click", async () => {
     await db.auth.signOut();
